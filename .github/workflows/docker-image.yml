@@ -32,15 +32,25 @@ jobs:
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 #       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-    - name: Build Docker Image
+    - name: BuildX Instalation
+      run: |
+        docker buildx create --name mybuilder --driver docker-container --bootstrap
+        docker buildx use mybuilder
+    - name: Build with BuildX and Push
       env:
         NEW_VERSION: ${{ steps.version.outputs.version }}
       run: |
-        docker build -t brayanvip/graphql:$NEW_VERSION .
-        docker build -t brayanvip/graphql:latest .
-    - name: Push Docker Image
-      env:
-        NEW_VERSION: ${{ steps.version.outputs.version }}
-      run: |
-        docker push brayanvip/graphql:$NEW_VERSION
-        docker push brayanvip/graphql:latest
+        docker buildx build --platform linux/amd64,linux/arm64 -t brayanvip/graphql:$NEW_VERSION --push .
+        docker buildx build --platform linux/amd64,linux/arm64 -t brayanvip/graphql:latest --push .
+#     - name: Build Docker Image
+#       env:
+#         NEW_VERSION: ${{ steps.version.outputs.version }}
+#       run: |
+#         docker build -t brayanvip/graphql:$NEW_VERSION .
+#         docker build -t brayanvip/graphql:latest .
+#     - name: Push Docker Image
+#       env:
+#         NEW_VERSION: ${{ steps.version.outputs.version }}
+#       run: |
+#         docker push brayanvip/graphql:$NEW_VERSION
+#         docker push brayanvip/graphql:latest
