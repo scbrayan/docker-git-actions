@@ -30,4 +30,4 @@ jobs:
         
     - name: Push Docker Image
       run: |
-        docker push -t brayanvip/graphql:0.0.2 .
+        docker push -t brayanvip/graphql:0.0.2
