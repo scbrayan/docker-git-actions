@@ -17,6 +17,16 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        
+    - name: Git Semantic Version
+      uses: PaulHatch/semantic-version@v4.0.3
+      with:
+        mayor_pattern: "mayor:"
+        minor_pattern: "feat:"
+        format: "${major}.${minor}.${patch}-prerelease${increment}"
+      id: version
+        
+    
     - name: Docker Login
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -25,9 +35,14 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 #       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
     - name: Build Docker Image
+      env:
+        NEW_VERSION: ${{ step.version.outputs.version }}
       run: |
-        docker build -t brayanvip/graphql:0.0.2 .
-        
+        docker build -t brayanvip/graphql:$NEW_VERSION .
+        docker build -t brayanvip/graphql:latest .
     - name: Push Docker Image
+      env:
+        NEW_VERSION: ${{ step.version.outputs.version }}
       run: |
         docker push brayanvip/graphql:0.0.2
+        docker push brayanvip/graphql:latest
